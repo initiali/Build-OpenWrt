@@ -7,7 +7,7 @@ on:
     branches:
       - master
     paths:
-      - 'lede.config'
+      - 'config/*.config'
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
