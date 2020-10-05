@@ -54,7 +54,7 @@ jobs:
       
     - name: Load custom configuration
       run: |
-        [ -e lede.config ] && mv lede.config openwrt/.config
+        [ -e config/pri2.config ] && mv config/rpi2.config openwrt/.config
         
     - name: Download package
       id: package
