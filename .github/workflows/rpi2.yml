@@ -12,7 +12,6 @@ env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
   FEEDS_CONF: feeds.conf.default
-  SSH_ACTIONS: true
   
 jobs:
   build:
@@ -54,7 +53,7 @@ jobs:
       
     - name: Load custom configuration
       run: |
-        [ -e config/pri2.config ] && mv config/rpi2.config openwrt/.config
+        [ -e config/rpi2.config ] && mv config/rpi2.config openwrt/.config
         
     - name: Download package
       id: package
