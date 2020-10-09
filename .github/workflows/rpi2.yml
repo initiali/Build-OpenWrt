@@ -70,8 +70,8 @@ jobs:
         cd openwrt
         make -j3 || make -j1 V=s
         echo "::set-output name=status::success"
-        grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
-        [ -s DEVICE_NAME ] && echo "DEVICE_NAME="$(cat DEVICE_NAME) >> $GITHUB_ENV
+        DN=$(grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/')
+        echo "DEVICE_NAME="$DN >> $GITHUB_ENV
         cd /workdir/openwrt/bin/targets/*/*
         echo "FIRMWARE="$PWD >> $GITHUB_ENV
         
@@ -79,26 +79,26 @@ jobs:
       uses: actions/upload-artifact@main
       if: steps.compile.outputs.status == 'success' 
       with:
-        name: openwrt${{ env.DEVICE_NAME }}-squashfs-factory.img.gz
+        name: openwrt-${{ env.DEVICE_NAME }}-squashfs-factory.img.gz
         path: ${{ env.FIRMWARE }}/openwrt*squashfs-factory.img.gz
 
     - name: Upload SquashFS Sysupgrade Image
       uses: actions/upload-artifact@main
       if: steps.compile.outputs.status == 'success' 
       with:
-        name: openwrt${{ env.DEVICE_NAME }}-squashfs-sysupgrade.img.gz
+        name: openwrt-${{ env.DEVICE_NAME }}-squashfs-sysupgrade.img.gz
         path: ${{ env.FIRMWARE }}/openwrt*squashfs-sysupgrade.img.gz
 
     - name: Upload Ext4 Factory Image
       uses: actions/upload-artifact@main
       if: steps.compile.outputs.status == 'success' 
       with:
-        name: openwrt${{ env.DEVICE_NAME }}-ext4-factory.img.gz
+        name: openwrt-${{ env.DEVICE_NAME }}-ext4-factory.img.gz
         path: ${{ env.FIRMWARE }}/openwrt*ext4-factory.img.gz
         
     - name: Upload Ext4 Sysupgrade Image
       uses: actions/upload-artifact@main
       if: steps.compile.outputs.status == 'success' 
       with:
-        name: openwrt${{ env.DEVICE_NAME }}-ext4-sysupgrade.img.gz
+        name: openwrt-${{ env.DEVICE_NAME }}-ext4-sysupgrade.img.gz
         path: ${{ env.FIRMWARE }}/openwrt*ext4-sysupgrade.img.gz
