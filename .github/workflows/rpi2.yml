@@ -7,7 +7,7 @@ on:
     branches:
       - main
     paths:
-      - 'config/*.config'
+      - 'config/rpi2.config'
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
