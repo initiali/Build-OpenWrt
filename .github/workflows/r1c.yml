@@ -53,7 +53,6 @@ jobs:
       
     - name: Load custom configuration
       run: |
-        [ -e files/target.mk ] && mv files/target.mk include/target.mk
         [ -e config/r1c.config ] && mv config/r1c.config openwrt/.config
         
     - name: Download package
