@@ -45,6 +45,9 @@ jobs:
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
         
+    - name: SSH connection to Actions
+      uses: P3TERX/ssh2actions@v1.0.0
+      
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
 
@@ -63,9 +66,6 @@ jobs:
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
-        
-    - name: SSH connection to Actions
-      uses: P3TERX/ssh2actions@v1.0.0
     
     - name: Compile the firmware
       id: compile
