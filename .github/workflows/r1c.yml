@@ -44,9 +44,6 @@ jobs:
     - name: Load custom feeds
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
-        
-    - name: SSH connection to Actions
-      uses: P3TERX/ssh2actions@v1.0.0
       
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
@@ -54,15 +51,25 @@ jobs:
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
         
+    - name: SSH connection to Actions
+      uses: P3TERX/ssh2actions@v1.0.0
+
     - name: Download package
       id: package
       run: |
         cd openwrt
         make defconfig
-        make download -j8
+        make download -j3
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
-    
+
+    - name: Upload .config File
+      uses: actions/upload-artifact@main
+      with:
+        name: openwrt/.config
+        path: config
+        
+
     - name: Compile the firmware
       id: compile
       run: |
@@ -73,7 +80,7 @@ jobs:
         echo "DEVICE_NAME="$DN >> $GITHUB_ENV
         cd $GITHUB_WORKSPACE/openwrt/bin/targets/*/*
         echo "FIRMWARE="$PWD >> $GITHUB_ENV
-        
+
     - name: Upload SquashFS Factory Image
       uses: actions/upload-artifact@main
       if: steps.compile.outputs.status == 'success' 
