@@ -66,8 +66,8 @@ jobs:
     - name: Upload .config File
       uses: actions/upload-artifact@main
       with:
-        name: openwrt/.config
-        path: config
+        name: config
+        path: openwrt/.config
         
 
     - name: Compile the firmware
