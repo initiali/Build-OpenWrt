@@ -53,10 +53,6 @@ jobs:
 
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
-      
-    - name: Load custom configuration
-      run: |
-        [ -e config/r1c.config ] && mv config/r1c.config openwrt/.config
         
     - name: Download package
       id: package
