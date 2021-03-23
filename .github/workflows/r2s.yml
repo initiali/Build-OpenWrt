@@ -8,7 +8,9 @@ on:
       - main
     paths:
       - 'config/r2s.config'
-  
+    schedule:
+      - cron: '11 18 * * *'
+
 jobs:
   build:
     runs-on: ubuntu-18.04
