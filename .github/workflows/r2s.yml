@@ -55,12 +55,6 @@ jobs:
     - name: SSH connection to Actions
       uses: P3TERX/ssh2actions@v1.0.0
 
-    - name: Upload .config File
-      uses: actions/upload-artifact@v2
-      with:
-        name: r2s.config
-        path: $GITHUB_WORKSPACE/lede/.config
-
     - name: Download package
       id: package
       run: |
@@ -87,3 +81,10 @@ jobs:
       with:
         name: openwrt-${{ env.DEVICE_NAME }}-squashfs-sysupgrade.img.gz
         path: ${{ env.FIRMWARE }}/openwrt*squashfs-sysupgrade.img.gz
+
+    - name: Upload .config File
+      uses: actions/upload-artifact@v2
+      with:
+        name: r2s.config
+        path: /workdir/lede/.config
+
