@@ -59,11 +59,10 @@ jobs:
       uses: P3TERX/ssh2actions@v1.0.0
 
     - name: Upload .config File
-      working-directory: $GITHUB_WORKSPACE/lede
       uses: actions/upload-artifact@v2
       with:
         name: r2s.config
-        path: .config
+        path: $GITHUB_WORKSPACE/lede/.config
 
     - name: Download package
       id: package
