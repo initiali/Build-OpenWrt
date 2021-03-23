@@ -53,10 +53,11 @@ jobs:
         cd lede
         ./scripts/feeds update -a
         ./scripts/feeds install -a
-
-    - name: SSH connection to Actions
-      uses: P3TERX/ssh2actions@v1.0.0
-
+    
+    - name: Load custom configuration
+      run: |
+        [ -e config/r2s.config ] && mv config/rpi2.config lede/.config
+        
     - name: Download package
       id: package
       run: |
