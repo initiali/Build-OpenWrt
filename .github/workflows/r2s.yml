@@ -8,17 +8,18 @@ on:
       - main
     paths:
       - 'config/r2s.config'
-env:
-  REPO_URL: https://github.com/coolsnowwolf/lede
-  REPO_BRANCH: master
-  FEEDS_CONF: feeds.conf.default
   
 jobs:
   build:
     runs-on: ubuntu-latest
     if: github.event.repository.owner.id == github.event.sender.id
-    
     steps:
+
+    - name: Set environment variables
+      run: |
+        echo "LEDE_BRANCH=master" >> $GITHUB_ENV
+        echo "LEDE_URL=https://github.com/coolsnowwolf/lede" >> $GITHUB_ENV
+        echo "LEDE_FEEDS_CONF=feeds.conf.default" >> $GITHUB_ENV
 
     - name: Checkout
       uses: actions/checkout@v2
@@ -42,12 +43,12 @@ jobs:
       working-directory: /workdir
       run: |
         df -hT $PWD
-        git clone --depth 1 $REPO_URL -b $REPO_BRANCH lede
+        git clone --depth 1 ${{ env.LEDE_URL }} -b ${{ env.LEDE_BRANCH }} lede
         ln -sf /workdir/lede $GITHUB_WORKSPACE/lede
         
     - name: Load custom feeds
       run: |
-        [ -e $FEEDS_CONF ] && mv $FEEDS_CONF lede/feeds.conf.default
+        [ -e ${{ env.LEDE_FEEDS_CONF }} ] && mv ${{ env.LEDE_FEEDS_CONF }} lede/feeds.conf.default
       
     - name: Update & Install feeds
       run: |
