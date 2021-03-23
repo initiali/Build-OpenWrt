@@ -11,22 +11,16 @@ on:
   
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     if: github.event.repository.owner.id == github.event.sender.id
     steps:
-
-    - name: Set environment variables
-      run: |
-        echo "LEDE_BRANCH=master" >> $GITHUB_ENV
-        echo "LEDE_URL=https://github.com/coolsnowwolf/lede" >> $GITHUB_ENV
-        echo "LEDE_FEEDS_CONF=feeds.conf.default" >> $GITHUB_ENV
 
     - name: Checkout
       uses: actions/checkout@v2
       with:
         ref: master
-        token: G12580
-
+        fetch-depth: 1
+        
     - name: Initialization environment
       env:
         DEBIAN_FRONTEND: noninteractive
@@ -39,6 +33,9 @@ jobs:
         sudo -E apt-get -qq clean
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
+        echo "LEDE_BRANCH=master" >> $GITHUB_ENV
+        echo "LEDE_URL=https://github.com/coolsnowwolf/lede" >> $GITHUB_ENV
+        echo "LEDE_FEEDS_CONF=feeds.conf.default" >> $GITHUB_ENV
         
     - name: Clone source code
       working-directory: /workdir
