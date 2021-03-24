@@ -56,7 +56,7 @@ jobs:
     
     - name: Load custom configuration
       run: |
-        [ -e config/r2s.config ] && mv config/rpi2.config lede/.config
+        [ -e config/r2s.config ] && mv config/r2s.config lede/.config
         
     - name: Download package
       id: package
