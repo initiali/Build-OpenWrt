@@ -1,4 +1,4 @@
-name: Build OpenWrt
+name: Build OpenWrt For R2s
 on:
   repository_dispatch:
   release:
