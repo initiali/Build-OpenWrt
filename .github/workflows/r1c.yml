@@ -1,4 +1,4 @@
-name: Build OpenWrt
+name: Build OpenWrt For r1c
 on:
   repository_dispatch:
   release:
@@ -8,11 +8,9 @@ on:
       - main
     paths:
       - 'config/r1c.config'
-env:
-  REPO_URL: https://github.com/coolsnowwolf/lede
-  REPO_BRANCH: master
-  FEEDS_CONF: feeds.conf.default
-  
+  schedule:
+    - cron: '11 18 * * *'
+
 jobs:
   build:
     runs-on: ubuntu-18.04
@@ -21,11 +19,12 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@master
-
+        
     - name: Initialization environment
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
+        docker rmi `docker images -q`
         sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
         sudo -E apt-get -qq update
         sudo -E apt-get -qq install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3 python2.7 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf wget curl swig rsync
@@ -33,77 +32,62 @@ jobs:
         sudo -E apt-get -qq clean
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
+
+        echo "LEDE_BRANCH=master" >> $GITHUB_ENV
+        echo "LEDE_URL=https://github.com/coolsnowwolf/lede" >> $GITHUB_ENV
+        echo "LEDE_FEEDS_CONF=feeds.conf.default" >> $GITHUB_ENV
         
     - name: Clone source code
       working-directory: /workdir
       run: |
         df -hT $PWD
-        git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
-        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+        git clone --depth 1 ${{ env.LEDE_URL }} -b ${{ env.LEDE_BRANCH }} lede
+        ln -sf /workdir/lede $GITHUB_WORKSPACE/lede
         
     - name: Load custom feeds
       run: |
-        [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
+        [ -e ${{ env.LEDE_FEEDS_CONF }} ] && mv ${{ env.LEDE_FEEDS_CONF }} lede/feeds.conf.default
       
-    - name: Update feeds
-      run: cd openwrt && ./scripts/feeds update -a
-
-    - name: Install feeds
-      run: cd openwrt && ./scripts/feeds install -a
+    - name: Update & Install feeds
+      run: |
+        cd lede
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+    
+    - name: Load custom configuration
+      run: |
+        [ -e config/r1c.config ] && mv config/r1c.config lede/.config
         
-    - name: SSH connection to Actions
-      uses: P3TERX/ssh2actions@v1.0.0
-
     - name: Download package
       id: package
       run: |
-        cd openwrt
+        cd lede
         make defconfig
         make download -j3
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
-
-    - name: Upload .config File
-      uses: actions/upload-artifact@main
-      with:
-        name: config
-        path: $GITHUB_WORKSPACE/openwrt/.config
         
     - name: Compile the firmware
       id: compile
       run: |
-        cd $GITHUB_WORKSPACE/openwrt
+        cd $GITHUB_WORKSPACE/lede
         make -j3 || make -j1 V=s
         echo "::set-output name=status::success"
         DN=$(grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/')
         echo "DEVICE_NAME="$DN >> $GITHUB_ENV
-        cd $GITHUB_WORKSPACE/openwrt/bin/targets/*/*
+        cd $GITHUB_WORKSPACE/lede/bin/targets/*/*
         echo "FIRMWARE="$PWD >> $GITHUB_ENV
 
-    - name: Upload SquashFS Factory Image
-      uses: actions/upload-artifact@main
-      if: steps.compile.outputs.status == 'success' 
-      with:
-        name: openwrt-${{ env.DEVICE_NAME }}-squashfs-factory.img.gz
-        path: ${{ env.FIRMWARE }}/openwrt*squashfs-factory.img.gz
-
     - name: Upload SquashFS Sysupgrade Image
-      uses: actions/upload-artifact@main
+      uses: actions/upload-artifact@v2
       if: steps.compile.outputs.status == 'success' 
       with:
         name: openwrt-${{ env.DEVICE_NAME }}-squashfs-sysupgrade.img.gz
         path: ${{ env.FIRMWARE }}/openwrt*squashfs-sysupgrade.img.gz
 
-    - name: Upload Ext4 Factory Image
-      uses: actions/upload-artifact@main
-      if: steps.compile.outputs.status == 'success' 
+    - name: Upload .config File
+      uses: actions/upload-artifact@v2
       with:
-        name: openwrt-${{ env.DEVICE_NAME }}-ext4-factory.img.gz
-        path: ${{ env.FIRMWARE }}/openwrt*ext4-factory.img.gz
-        
-    - name: Upload Ext4 Sysupgrade Image
-      uses: actions/upload-artifact@main
-      if: steps.compile.outputs.status == 'success' 
-      with:
-        name: openwrt-${{ env.DEVICE_NAME }}-ext4-sysupgrade.img.gz
-        path: ${{ env.FIRMWARE }}/openwrt*ext4-sysupgrade.img.gz
+        name: r1c.config
+        path: /workdir/lede/.config
+
